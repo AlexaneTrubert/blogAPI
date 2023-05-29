@@ -16,6 +16,5 @@ python -m venv venv
 .venv/bin/activate  
 pip install -r requirements.txt  
 python build_db.py  
-flask --app api run```
-
-
+flask --app api run
+```
