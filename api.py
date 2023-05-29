@@ -19,7 +19,11 @@ def list():
     articleObjs = [Article(
         article['rowid'],
         article['title'],
-        article['body'],
+        article['description'],
+        article['createdDate'],
+        article['snaps'],
+        article['imageURL'],
+        article['location']
     ).to_json() for article in articles]
 
     return {
@@ -27,9 +31,8 @@ def list():
         "articles": articleObjs
     }
 
-@app.route("/articles/id", methods=['GET'])
-def get():
-    id = request.args.get('id', None)
+@app.route("/articles/<id>", methods=['GET'])
+def get(id):
     article = Database.query_db('SELECT rowid, * FROM article WHERE rowid = ?', (id))
 
     if len(article) < 1:
@@ -39,17 +42,25 @@ def get():
     articleObj = Article(
         article['rowid'],
         article['title'],
-        article['body']
+        article['description'],
+        article['createdDate'],
+        article['snaps'],
+        article['imageURL'],
+        article['location']
     )
 
     return {"success": True, "data": articleObj.to_json()}
 
-@app.route("/post", methods=['POST'])
+@app.route("/articles", methods=['POST'])
 def add_article():
     title = request.form.get('title', None)
-    body = request.form.get('body', None)
+    description = request.form.get('description', None)
+    createdDate = time.strftime('%Y-%m-%d %H:%M:%S')
+    snaps = 0
+    imageURL = request.form.get('imageURL', None)
+    location = request.form.get('location', None)
 
-    article = Article(None, title, body)
+    article = Article(None, title, description, createdDate, snaps, imageURL, location)
 
     if not article.is_valid():
         return article.is_valid()
