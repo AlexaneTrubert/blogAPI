@@ -12,7 +12,7 @@ def home():
     return "<h1>API d'un super blog (ou pas)</h1>"
 
 
-@app.route("/articles", methods=['GET'])
+@app.route("/facesnaps", methods=['GET'])
 def list():
     articles = Database.query_db('SELECT rowid, * FROM article')
 
@@ -22,16 +22,16 @@ def list():
         article['description'],
         article['createdDate'],
         article['snaps'],
-        article['imageURL'],
+        article['imageUrl'],
         article['location']
     ).to_json() for article in articles]
 
     return {
-        "ts": int(round(time.time()*100)),
-        "articles": articleObjs
+        "facesnaps": articleObjs,
+        "ts": int(round(time.time()*100))
     }
 
-@app.route("/articles/<id>", methods=['GET'])
+@app.route("/facesnaps/<id>", methods=['GET'])
 def get(id):
     article = Database.query_db('SELECT rowid, * FROM article WHERE rowid = ?', (id))
 
@@ -45,22 +45,22 @@ def get(id):
         article['description'],
         article['createdDate'],
         article['snaps'],
-        article['imageURL'],
+        article['imageUrl'],
         article['location']
     )
 
-    return {"success": True, "data": articleObj.to_json()}
+    return {"success": True, "facesnap": articleObj.to_json()}
 
-@app.route("/articles", methods=['POST'])
+@app.route("/facesnaps", methods=['POST'])
 def add_article():
     title = request.form.get('title', None)
     description = request.form.get('description', None)
     createdDate = time.strftime('%Y-%m-%d %H:%M:%S')
     snaps = 0
-    imageURL = request.form.get('imageURL', None)
+    imageUrl = request.form.get('imageUrl', None)
     location = request.form.get('location', None)
 
-    article = Article(None, title, description, createdDate, snaps, imageURL, location)
+    article = Article(None, title, description, createdDate, snaps, imageUrl, location)
 
     if not article.is_valid():
         return article.is_valid()
@@ -69,6 +69,22 @@ def add_article():
         return {"success": True}
     
     return {"error": "Une erreur est survenue"}
+
+@app.route("/facesnaps/<id>/snaps", methods=["PUT"])
+def add_snap(id):
+
+    article = Article.findOneById(id)
+
+    if not isinstance(article, Article):
+        return {"error": "Cet article n'existe pas"}
+
+    result = article.add_snap()
+    if not result == True:
+        return result
+
+    return {"success": True}
+
+
 
 @app.errorhandler(404)
 def not_found(error):
