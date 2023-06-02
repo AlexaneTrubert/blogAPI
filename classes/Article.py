@@ -63,11 +63,15 @@ class Article:
             "imageUrl": self.imageUrl,
             "createdDate": self.createdDate,
             "snaps": self.snaps,
-            "location": self.location
+            "location": self.location,
         }
 
     def add_snap(self):
         self.snaps += 1
+        return self.update()
+
+    def remove_snap(self):
+        self.snaps -= 1
         return self.update()
     
     @staticmethod
