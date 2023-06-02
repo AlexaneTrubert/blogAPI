@@ -3,13 +3,13 @@ from classes.Database import Database
 
 class Article:
 
-    def __init__(self, id, title, description, createdDate, snaps, imageURL, location):
+    def __init__(self, id, title, description, createdDate, snaps, imageUrl, location):
         self.id = id
         self.title = title
         self.description = description
         self.createdDate = createdDate
         self.snaps = snaps
-        self.imageURL = imageURL
+        self.imageUrl = imageUrl
         self.location = location
 
     def is_valid(self):
@@ -38,8 +38,18 @@ class Article:
 
         try:
             Database.commit_bd(
-                "INSERT INTO article(title, description, createdDate, snaps, imageURL, location) VALUES (?, ?, ?, 0, ?, ?)",
-                (self.title, self.description, formatted_date, self.imageURL, self.location)
+                "INSERT INTO article(title, description, createdDate, snaps, imageUrl, location) VALUES (?, ?, ?, 0, ?, ?)",
+                (self.title, self.description, formatted_date, self.imageUrl, self.location)
+            )
+            return True
+        except:
+            return {"error": "Une erreur est survenue"}
+
+    def update(self):
+        try:
+            Database.commit_bd(
+                "UPDATE article SET title = ?, description = ?, imageUrl = ?, location = ?, snaps = ? WHERE rowid = ?",
+                (self.title, self.description, self.imageUrl, self.location, self.snaps, self.id)
             )
             return True
         except:
@@ -50,11 +60,19 @@ class Article:
             "id": self.id,
             "title": self.title,
             "description": self.description,
+            "imageUrl": self.imageUrl,
             "createdDate": self.createdDate,
             "snaps": self.snaps,
-            "imageURL": self.imageURL,
-            "location": self.location
+            "location": self.location,
         }
+
+    def add_snap(self):
+        self.snaps += 1
+        return self.update()
+
+    def remove_snap(self):
+        self.snaps -= 1
+        return self.update()
     
     @staticmethod
     def findOneById(id):
@@ -67,6 +85,10 @@ class Article:
             article[0]['rowid'],
             article[0]['title'],
             article[0]['description'],
+            article[0]['createdDate'],
+            article[0]['snaps'],
+            article[0]['imageUrl'],
+            article[0]['location']
         )
 
         return article
