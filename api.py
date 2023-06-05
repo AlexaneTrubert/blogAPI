@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, render_template
 from flask_cors import CORS
 import time
 from classes.Database import Database
@@ -10,7 +10,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/', methods=['GET'])
 def home():
-    return "<h1>API d'un super blog (ou pas)</h1>"
+    return render_template('index.html')
 
 
 # On s'occupe des articles / facesnaps
@@ -36,13 +36,11 @@ def list():
 @app.route("/facesnaps/<id>", methods=['GET'])
 def get(id):
     article = Database.query_db('SELECT rowid, * FROM article WHERE rowid = ?', (id))
-    commentaires = Database.query_db('SELECT rowid, * FROM comments WHERE article_id = ?', (id))
 
     if len(article) < 1:
         return {"error": "L'id n'existe pas"}
 
     article = article[0]
-    commentaires = commentaires[0]
 
     articleObj = Article(
         article['rowid'],
@@ -54,15 +52,7 @@ def get(id):
         article['location'],
     )
 
-    commentairesObjs = Commentaire(
-        commentaires['rowid'],
-        commentaires['article_id'],
-        commentaires['name'],
-        commentaires['comment'],
-        commentaires['ts'],
-    )
-
-    return {"success": True, "facesnap": articleObj.to_json(), "comment": commentairesObjs.to_json()}
+    return {"success": True, "facesnap": articleObj.to_json()}
 
 @app.route("/facesnaps", methods=['POST'])
 def add_article():
